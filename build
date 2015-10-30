@@ -1,0 +1,1 @@
+go build -i -o app -tags netgo --ldflags '-extldflags "-lm -lstdc++ -static"'
