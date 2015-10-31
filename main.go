@@ -1,13 +1,13 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
-	"io/ioutil"
-	"fmt"
-	"encoding/json"
 	"os"
-	"bytes"
 )
 
 type Payload struct {
@@ -16,8 +16,8 @@ type Payload struct {
 }
 
 type Repository struct {
-	RepoName    string `json:"repo_name"`
-	Status      string
+	RepoName string `json:"repo_name"`
+	Status   string
 }
 
 type Callback struct {
@@ -28,7 +28,7 @@ type Callback struct {
 }
 
 func main() {
-	logger := log.New(os.Stdout, "", log.Ldate | log.Ltime | log.LUTC)
+	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime|log.LUTC)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		var payload Payload
 		var err error
@@ -36,7 +36,7 @@ func main() {
 			logger.Println(err)
 			return
 		}
-		fmt.Fprintf(w, "%s\n", payload) 
+		fmt.Fprintf(w, "%s\n", payload)
 		if err := sendCallback(payload.CallbackUrl, err); err != nil {
 			logger.Printf("Failed to send callback to %s : %s\n", payload.CallbackUrl, err)
 		}
@@ -57,7 +57,7 @@ func parsePayload(r *http.Request) (p Payload, err error) {
 	return p, nil
 }
 
-func sendCallback(url string, processingErr error) (error) {
+func sendCallback(url string, processingErr error) error {
 	var callback Callback
 	if processingErr == nil {
 		callback.State = "success"
@@ -71,4 +71,3 @@ func sendCallback(url string, processingErr error) (error) {
 	http.Post(url, "application/json", bytes.NewReader(body))
 	return nil
 }
-
